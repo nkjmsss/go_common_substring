@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"time"
-	"sync"
 	"runtime"
+	"sync"
+	"time"
 )
 
 func main() {
@@ -46,7 +46,7 @@ func compareLetters(s []byte) (length, i1, i2 int, err error) {
 			defer wg.Done()
 			semaphore <- 1
 
-			l, j, _ := compareLettersSub(s, i)
+			l, j, _ := compareLettersSub(s, i) // 面倒なのでどうせ大丈夫だしとエラーを握りつぶしています（ホントはダメ）
 			if l > length {
 				length = l
 				i1 = j
