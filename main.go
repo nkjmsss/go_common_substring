@@ -6,6 +6,8 @@ import (
 	"math/rand"
 	"os"
 	"time"
+	"sync"
+	"runtime"
 )
 
 func main() {
@@ -22,7 +24,7 @@ func main() {
 	fmt.Println(l, i1, i2)
 
 	end := time.Now()
-	fmt.Printf("total processing time: %f s", end.Sub(start).Seconds())
+	fmt.Printf("total processing time: %f s\n", end.Sub(start).Seconds())
 
 	// if err := makeRandomLetters(); err != nil {
 	// 	fmt.Println(err.Error())
@@ -32,19 +34,30 @@ func main() {
 
 func compareLetters(s []byte) (length, i1, i2 int, err error) {
 	length = 0
+	wg := sync.WaitGroup{}
+	cpu := runtime.NumCPU()
+	semaphore := make(chan int, cpu)
 
 	// 部分列なのでi=0はダメ
 	for i := 1; i < len(s); i++ {
-		l, j, err := compareLettersSub(s, i)
-		if err != nil {
-			return 0, 0, 0, err
-		}
-		if l > length {
-			length = l
-			i1 = j
-			i2 = i
-		}
+		wg.Add(1)
+
+		go func(i int) {
+			defer wg.Done()
+			semaphore <- 1
+
+			l, j, _ := compareLettersSub(s, i)
+			if l > length {
+				length = l
+				i1 = j
+				i2 = i
+			}
+
+			<-semaphore
+		}(i)
 	}
+
+	wg.Wait()
 
 	return length, i1, i2, nil
 }
@@ -87,6 +100,8 @@ func compareLettersSub(s []byte, offset int) (length, idx int, err error) {
 	return length, idx, nil
 }
 
+// to create random letters
+// it's not necessary actually
 func makeRandomLetters() error {
 	var length int
 	fmt.Scan(&length)
