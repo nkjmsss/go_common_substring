@@ -1,0 +1,9 @@
+version: "2"
+services:
+  go:
+    build: .
+    volumes:
+      - .:/go/src/github.com/nkjmsss/go_common_substring
+    environment:
+      GO111MODULE: "on"
+    tty: true
